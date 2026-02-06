@@ -73,8 +73,15 @@ def process_ohlcv(input_path: str, output_path: str):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     df.to_csv(output_path, index=False)
-    print(f"✅ Saved features → {output_path}")
-    
     
 
+if __name__ == "__main__":
+    process_ohlcv(
+        "ml/data/raw/v1/BTCUSDT_15m.csv",
+        "ml/data/processed/v1/BTCUSDT_15m_features.csv"
+    )
 
+    process_ohlcv(
+        "ml/data/raw/v1/ETHUSDT_15m.csv",
+        "ml/data/processed/v1/ETHUSDT_15m_features.csv"
+    )
