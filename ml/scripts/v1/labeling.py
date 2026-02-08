@@ -41,8 +41,8 @@ def label_trades_atr(
         tp_short = entry - tp_mult * atr
         sl_short = entry + sl_mult * atr
 
-        max_bars = int(max_atr_mult * atr / atr)  
-        max_bars = max(5, max_bars)  
+        max_bars = int(max_atr_mult * 10)  
+        max_bars = max(10, max_bars)  
 
         label = 0
         mfe = 0.0
@@ -89,10 +89,9 @@ def label_trades_atr(
 
     return df
 
-
 if __name__ == "__main__":
     INPUT_PATH = "ml/data/processed/v1/signal_filtering/BTCUSDT_15m_features_signal_filtering.csv"
-    OUTPUT_PATH = "ml/data/processed/v1/labeled/BTCUSDT_15m_labeled.csv"
+    OUTPUT_PATH = "ml/data/processed/v1/labeled/BTCUSDT_15m_labeled(2).csv"
 
     df = pd.read_csv(INPUT_PATH)
     labeled_df = label_trades_atr(df)
@@ -102,3 +101,36 @@ if __name__ == "__main__":
 
     labeled_df.to_csv(OUTPUT_PATH, index=False)
     
+    numeric_cols = labeled_df.select_dtypes(include=[np.number]).columns
+    bad_cols = []
+
+    for col in numeric_cols:
+        nan_pct = labeled_df[col].isna().mean()
+        inf_pct = np.isinf(labeled_df[col]).mean()
+
+        if nan_pct > 0 or inf_pct > 0:
+            bad_cols.append((col, nan_pct, inf_pct))
+
+    print("Bad columns (NaN / inf):", bad_cols)
+    
+    print(labeled_df[[
+        "rsi_14",
+        "atr_pct",
+        "vol_ratio",
+        "price_ema20_dist"
+    ]].describe())
+    print(labeled_df.var().sort_values().head(10))
+    
+    shifted = labeled_df.copy()
+    feature_cols = [
+    c for c in shifted.columns
+    if c not in ["label", "time_to_hit", "mfe", "mae", "timestamp"]
+]
+
+    shifted[feature_cols] = shifted[feature_cols].shift(1)
+
+    
+    corr_now = labeled_df[feature_cols].corrwith(labeled_df["label"]).abs().mean()
+    corr_shift = shifted[feature_cols].corrwith(shifted["label"]).abs().mean()
+
+    print("Corr now vs shifted:", corr_now, corr_shift)
