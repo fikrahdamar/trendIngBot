@@ -13,9 +13,8 @@ def label_trades_atr(
     Labels trades using ATR-based TP/SL and ATR-based horizon.
 
     Labels:
-        1  = LONG (TP hit first)
-       -1  = SHORT (TP hit first)
-        0  = NO TRADE (SL first or no hit)
+        1 = GOOD TRADE (TP hit before SL in trend direction)
+        0 = BAD / NO TRADE
     """
 
     df = df.copy().reset_index(drop=True)
@@ -26,6 +25,19 @@ def label_trades_atr(
     mae_list = []
 
     for i in range(len(df)):
+        trend = df.loc[i, "ema_trend"]
+
+        if trend == 1:
+            direction = "long"
+        elif trend == -1:
+            direction = "short"
+        else:
+            labels.append(0)
+            time_to_hit.append(np.nan)
+            mfe_list.append(0)
+            mae_list.append(0)
+            continue
+
         entry = df.loc[i, "close"]
         atr = df.loc[i, atr_col]
 
@@ -36,10 +48,12 @@ def label_trades_atr(
             mae_list.append(0)
             continue
 
-        tp_long = entry + tp_mult * atr
-        sl_long = entry - sl_mult * atr
-        tp_short = entry - tp_mult * atr
-        sl_short = entry + sl_mult * atr
+        if direction == "long":
+            tp = entry + tp_mult * atr
+            sl = entry - sl_mult * atr
+        else:
+            tp = entry - tp_mult * atr
+            sl = entry + sl_mult * atr
 
         max_bars = int(max_atr_mult * 10)  
         max_bars = max(10, max_bars)  
@@ -53,29 +67,31 @@ def label_trades_atr(
             high = df.loc[i + j, "high"]
             low = df.loc[i + j, "low"]
 
-          
-            mfe = max(mfe, high - entry)
-            mae = min(mae, low - entry)
+            if direction == "long":
+                mfe = max(mfe, high - entry)
+                mae = min(mae, low - entry)
 
-       
-            if high >= tp_long:
-                label = 1
-                resolved_at = j
-                break
-            if low <= sl_long:
-                label = 0
-                resolved_at = j
-                break
+                if high >= tp:
+                    label = 1
+                    resolved_at = j
+                    break
+                if low <= sl:
+                    label = 0
+                    resolved_at = j
+                    break
 
-       
-            if low <= tp_short:
-                label = -1
-                resolved_at = j
-                break
-            if high >= sl_short:
-                label = 0
-                resolved_at = j
-                break
+            else:  # short
+                mfe = max(mfe, entry - low)
+                mae = min(mae, entry - high)
+
+                if low <= tp:
+                    label = 1
+                    resolved_at = j
+                    break
+                if high >= sl:
+                    label = 0
+                    resolved_at = j
+                    break
 
         labels.append(label)
         time_to_hit.append(resolved_at)
@@ -119,12 +135,18 @@ if __name__ == "__main__":
         "vol_ratio",
         "price_ema20_dist"
     ]].describe())
-    print(labeled_df.var().sort_values().head(10))
+    print(
+    labeled_df
+    .select_dtypes(include=[np.number])
+    .var()
+    .sort_values()
+    .head(10)
+)
     
     shifted = labeled_df.copy()
     feature_cols = [
     c for c in shifted.columns
-    if c not in ["label", "time_to_hit", "mfe", "mae", "timestamp"]
+    if c not in ["label", "time_to_hit", "mfe", "mae", "timestamp", "ema_trend"]
 ]
 
     shifted[feature_cols] = shifted[feature_cols].shift(1)
