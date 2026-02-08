@@ -61,7 +61,7 @@ def label_trades_atr(
         label = 0
         mfe = 0.0
         mae = 0.0
-        resolved_at = None
+        resolved_at = np.nan
 
         for j in range(1, min(max_bars + 1, len(df) - i)):
             high = df.loc[i + j, "high"]
@@ -156,3 +156,6 @@ if __name__ == "__main__":
     corr_shift = shifted[feature_cols].corrwith(shifted["label"]).abs().mean()
 
     print("Corr now vs shifted:", corr_now, corr_shift)
+    print(
+    labeled_df.groupby("ema_trend")["label"].mean()
+)
