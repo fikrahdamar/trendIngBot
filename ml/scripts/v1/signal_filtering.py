@@ -37,10 +37,10 @@ def filter_signals(
 
 
 if __name__ == "__main__":
-    df_btc = pd.read_csv("ml/data/processed/v1/BTCUSDT_15m_fetures.csv")
+    df_btc = pd.read_csv("ml/data/processed/v1/BTCUSDT_15m_features.csv")
     btc_df_filtered = filter_signals(df_btc)
-    btc_df_filtered.to_csv("ml/data/processed/v1/BTCUSDT_15m_fetures_signal_filtering.csv", index=False)
+    btc_df_filtered.to_csv("ml/data/processed/v1/signal_filtering/BTCUSDT_15m_features_signal_filtering.csv", index=False)
 
-    df_eth = pd.read_csv("ml/data/processed/v1/ETHUSDT_15m_fetures.csv")
+    df_eth = pd.read_csv("ml/data/processed/v1/ETHUSDT_15m_features.csv")
     eth_df_filtered = filter_signals(df_eth)
-    eth_df_filtered.to_csv("ml/data/processed/v1/ETHUSDT_15m_fetures_signal_filtering.csv", index=False)
+    eth_df_filtered.to_csv("ml/data/processed/v1/signal_filtering/ETHUSDT_15m_features_signal_filtering.csv", index=False)
