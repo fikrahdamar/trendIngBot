@@ -106,8 +106,8 @@ def label_trades_atr(
     return df
 
 if __name__ == "__main__":
-    INPUT_PATH = "ml/data/processed/v1/signal_filtering/BTCUSDT_15m_features_signal_filtering.csv"
-    OUTPUT_PATH = "ml/data/processed/v1/labeled/BTCUSDT_15m_labeled(2).csv"
+    INPUT_PATH = "ml/data/processed/v1/signal_filtering/ETHUSDT_15m_features_signal_filtering.csv"
+    OUTPUT_PATH = "ml/data/processed/v1/labeled/ETHUSDT_15m_labeled(2).csv"
 
     df = pd.read_csv(INPUT_PATH)
     labeled_df = label_trades_atr(df)
