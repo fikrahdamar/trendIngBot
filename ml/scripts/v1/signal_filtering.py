@@ -2,28 +2,24 @@ import pandas as pd
 
 def filter_signals(
     df: pd.DataFrame,
-    min_atr_pct=0.0008,
-    min_vol_ratio=0.5,
-    max_price_ema_dist=0.03
+    min_atr_pct=0.001,
+    min_vol_ratio=1.2,
+    max_price_ema_dist=0.02
 ) -> pd.DataFrame:
 
     original_len = len(df)
     df = df.dropna()
 
-    # Volatility filter
     df = df[df["atr_pct"] >= min_atr_pct]
-
-    # Volume filter
     df = df[df["vol_ratio"] >= min_vol_ratio]
 
-    # Candle structure sanity
     df = df[
         (df["body_pct"] >= 0) &
         (df["upper_wick_pct"] >= 0) &
         (df["lower_wick_pct"] >= 0)
     ]
 
-    # Spike protection
+
     if "price_ema20_dist" in df.columns:
         df = df[df["price_ema20_dist"].abs() <= max_price_ema_dist]
 

@@ -1,14 +1,11 @@
 import pandas as pd
 import numpy as np
 
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import RobustScaler
+from sklearn.metrics import roc_auc_score, classification_report, confusion_matrix
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import (
-    roc_auc_score,
-    classification_report,
-    confusion_matrix
-)
+
 
 
 DATA_PATH = "ml/data/processed/v1/labeled/BTCUSDT_15m_labeled(2).csv"
@@ -35,15 +32,19 @@ TARGET = "label"
 TRAIN_RATIO = 0.7
 
 df = pd.read_csv(DATA_PATH)
-
+df = df[df["label"].isin([0, 1])].reset_index(drop=True)
 df = df[df["ema_trend"] != 0].reset_index(drop=True)
 
-X = df[FEATURES]
+feature_cols = [f for f in FEATURES if f != "ema_trend"]
+X = df[feature_cols].shift(1)
 y = df[TARGET]
 
+X = X.iloc[1:]
+y = y.iloc[1:]
+X["ema_trend"] = df["ema_trend"].iloc[1:].values
 
-split_idx = int(len(df) * TRAIN_RATIO)
 
+split_idx = int(len(X) * 0.7)
 X_train, X_val = X.iloc[:split_idx], X.iloc[split_idx:]
 y_train, y_val = y.iloc[:split_idx], y.iloc[split_idx:]
 
@@ -53,11 +54,14 @@ print(f"Positive rate (val):   {y_val.mean():.3f}")
 
 
 model = Pipeline([
-    ("scaler", StandardScaler()),
-    ("clf", LogisticRegression(
-        max_iter=1000,
+    ("scaler", RobustScaler()), 
+    ("clf", RandomForestClassifier(
+        n_estimators=300,
+        max_depth=12,
+        min_samples_leaf=30,
         class_weight="balanced",
-        n_jobs=1
+        random_state=42,
+        n_jobs=-1
     ))
 ])
 
@@ -87,10 +91,10 @@ for k in [0.1, 0.2, 0.3]:
     print(f" Top {int(k*100)}%: {precision_at_k(y_val, probs, k):.3f}")
 
 
-coefs = pd.Series(
-    model.named_steps["clf"].coef_[0],
-    index=FEATURES
-).sort_values(key=np.abs, ascending=False)
+importances = pd.Series(
+    model.named_steps["clf"].feature_importances_,
+    index=X.columns
+).sort_values(ascending=False)
 
-print("\nTop feature weights:")
-print(coefs.head(10))
+print("\nTop Predictors (Random Forest):")
+print(importances.head(10))
