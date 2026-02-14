@@ -4,9 +4,9 @@ import time
 from datetime import datetime, timedelta
 import os
 
-SYMBOLS = ["BTC/USDT", "ETH/USDT"]
+SYMBOLS = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT"]
 TIMEFRAME = "15m"
-YEARS_BACK = 2
+YEARS_BACK = 5
 EXCHANGE_NAME = "binance"
 
 SAVE_DIR = "ml/data/raw/v1/"
@@ -71,7 +71,7 @@ def main():
 
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
 
-        filename = f"{symbol.replace('/', '')}_{TIMEFRAME}.csv"
+        filename = f"{symbol.replace('/', '')}_{TIMEFRAME}(5Y).csv"
         path = os.path.join(SAVE_DIR, filename)
 
         df.to_csv(path, index=False)
