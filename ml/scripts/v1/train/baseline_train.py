@@ -16,7 +16,6 @@ FEATURES = [
     "body_pct", "upper_wick_pct", "lower_wick_pct",
     "ema_trend",
     
-    # MTF Features
     "ema_trend_1h", "adx_1h", "rsi_14_1h", "ema20_slope_1h" 
 ]
 
