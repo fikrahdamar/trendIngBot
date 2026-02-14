@@ -103,4 +103,3 @@ if __name__ == "__main__":
 
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     labeled_df.to_csv(OUTPUT_PATH, index=False)
-    print(f"Saved to {OUTPUT_PATH}")
