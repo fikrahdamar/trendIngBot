@@ -83,8 +83,8 @@ def label_mean_reversion(
     return df
 
 if __name__ == "__main__":
-    INPUT_PATH = "ml/data/processed/v1/BTCUSDT_15m_features.csv"
-    OUTPUT_PATH = "ml/data/processed/v1/labeled/BTCUSDT_15m_reversion.csv"
+    INPUT_PATH = "ml/data/processed/v1/BNBUSDT_15m_features(5Y).csv"
+    OUTPUT_PATH = "ml/data/processed/v1/labeled/reversion/BNBUSDT_15m_reversion(5Y).csv"
 
     if not os.path.exists(INPUT_PATH):
         print("Run feature_engineering.py first!")
