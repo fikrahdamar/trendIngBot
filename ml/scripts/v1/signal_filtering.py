@@ -1,3 +1,10 @@
+"""
+    Theres a "Time Teleporter" bug  that scrambles data
+    filter rows and then reset_index(drop=True), destroy the continuity of time.
+    NOT USED (maybe)
+
+"""
+
 import pandas as pd
 
 def filter_signals(
